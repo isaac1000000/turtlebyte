@@ -16,7 +16,9 @@ from utils import normalize, detection
 load_dotenv('.env', override=True)
 
 # HIGHLY experimental. Don't change unless you've got some big ideas...
-BLOCK_SIZE = 512
+BLOCK_SIZE = (32, 16) # (width, height) in bytes
+BLOCK_GAP = 4 # number of pen size units to leave between blocks in the grid
+CELL_GAP = 1 # number of pen size units between cells in a block
 BYTE_ORDER = 'little'
 
 try:
@@ -27,11 +29,14 @@ try:
     TURTLE_WINDOW_BUFFER = int(os.getenv('TURTLE_WINDOW_BUFFER'))
 
     turtle_origin = ((-TURTLE_SCREENSIZE_X+TURTLE_PEN_SIZE)//2+TURTLE_WINDOW_BUFFER, (TURTLE_SCREENSIZE_Y-TURTLE_PEN_SIZE)//2-TURTLE_WINDOW_BUFFER)
+
+    GRID_WIDTH = int(os.getenv('GRID_WIDTH'))
+    GRID_HEIGHT = int(os.getenv('GRID_HEIGHT'))
 except Exception:
     print("Error loading environment variables. Ensure your .env file is properly configured")
     exit()
 
-normalizer = normalize.Normalizer(turtle_origin, TURTLE_PEN_SIZE, BLOCK_SIZE)
+normalizer = normalize.Normalizer(turtle_origin, TURTLE_PEN_SIZE, BLOCK_SIZE, GRID_WIDTH, GRID_HEIGHT, BLOCK_GAP, CELL_GAP, BYTE_ORDER)
 detector = detection.Detector(t)
 
 def read_byte(address:bytes) -> bytes:
@@ -43,7 +48,9 @@ def read_byte(address:bytes) -> bytes:
     Returns:
         bytes: the byte found at address.
     """
-    t.setposition(turtle_origin)
+
+    normalized_address = normalizer.address_to_pos(address)
+    t.setpos(normalized_address)
     t.seth(0)
 
     byte = _read_nibble()
@@ -89,10 +96,11 @@ def write_byte(address: bytes, data: bytes) -> bool:
     assert isinstance(data, bytes), "Invalid operation: attempt to write non-bytes object"
     assert len(data) == 1, "Invalid operation: attempt to write more or less than one byte"
 
-    #TODO: move to memory address
+    normalized_address = normalizer.address_to_pos(address)
+    t.setpos(normalized_address)
+    t.seth(0)
 
     bit_array = [int.from_bytes(data, BYTE_ORDER) & 2**i != 0 for i in range(7, -1, -1)] # endian-ness does not matter here b/c one byte
-    print(bit_array)
 
     try:
         _write_nibble_at_current(bit_array[:4])
@@ -177,6 +185,7 @@ def initialize():
 
     screen = t.Screen()
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
+    screen.tracer(0)
 
     t.pensize(TURTLE_PEN_SIZE)
     t.speed(TURTLE_SPEED)
@@ -185,8 +194,13 @@ def initialize():
 
 if __name__ == "__main__":
     initialize()
-    write_byte(0, b'\xAA')
     t.setposition(turtle_origin)
-    print(read_byte(0))
 
+    for i in range(256):
+        data = i.to_bytes(1, BYTE_ORDER)
+        for j in range(256):
+            address = (i*j).to_bytes(2, BYTE_ORDER)
+            write_byte(address, data)
+
+    t.Screen().update()
     input()

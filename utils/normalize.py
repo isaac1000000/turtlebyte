@@ -15,11 +15,10 @@ class Normalizer:
         self.byte_order = byte_order
 
         self.total_blocks = grid_width * grid_height
-        self.block_width = block_size[0] * turtle_pen_size * 4 + (block_size[0]-1) * cell_gap + block_gap
-        self.block_height = block_size[1] * turtle_pen_size * 2 + (block_size[1]-1) * cell_gap + block_gap
-        self.cell_width = turtle_pen_size * 4 + cell_gap
-        self.cell_height = turtle_pen_size * 2 + cell_gap
-
+        self.cell_width = (turtle_pen_size + cell_gap) * 4
+        self.cell_height = (turtle_pen_size + cell_gap) * 2
+        self.block_width = block_size[0] * self.cell_width + block_gap * turtle_pen_size
+        self.block_height = block_size[1] * self.cell_height + block_gap * turtle_pen_size
 
     def address_to_pos(self, address: bytes) -> tuple[int]:
         """
@@ -38,10 +37,14 @@ class Normalizer:
         block = address_literal // (self.block_size[0] * self.block_size[1])
         assert block < self.total_blocks
 
-        cell = address_literal & (self.block_size[0] * self.block_size[1])
+        cell = address_literal % (self.block_size[0] * self.block_size[1])
         assert cell < self.block_size[0] * self.block_size[1]
 
-        x = (block % self.grid_width) * self.block_width + (cell % self.block_size[0]) * self.cell_width
-        y = (block % self.grid_height) * self.block_height + (cell % self.block_size[1]) * self.cell_height
+        print(block, cell)
+
+        x = self.turtle_origin[0] + ((block % self.grid_width) * self.block_width + (cell % self.block_size[0]) * self.cell_width)
+        y = self.turtle_origin[1] - ((block // self.grid_width) * self.block_height + (cell // self.block_size[0]) * self.cell_height)
+
+        print(x, y)
 
         return (x, y)
