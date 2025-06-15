@@ -8,9 +8,9 @@ little project. Enjoy!
 author: isaac1000000
 """
 
+import os
 import turtle as t
 from dotenv import load_dotenv
-import os
 
 load_dotenv('.env', override=True)
 
@@ -20,6 +20,7 @@ try:
     TURTLE_SCREENSIZE_X = int(os.getenv('TURTLE_SCREENSIZE_X'))
     TURTLE_SCREENSIZE_Y = int(os.getenv('TURTLE_SCREENSIZE_Y'))
     TURTLE_WINDOW_BUFFER = int(os.getenv('TURTLE_WINDOW_BUFFER'))
+    turtle_origin = ((-TURTLE_SCREENSIZE_X+TURTLE_PEN_SIZE)//2+TURTLE_WINDOW_BUFFER, (TURTLE_SCREENSIZE_Y-TURTLE_PEN_SIZE)//2-TURTLE_WINDOW_BUFFER)
 except Exception:
     print("Error loading environment variables. Ensure your .env file is properly configured")
     exit()
@@ -29,8 +30,6 @@ def initialize():
 
     screen = t.Screen()
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
-
-    turtle_origin = ((-TURTLE_SCREENSIZE_X+TURTLE_PEN_SIZE)//2+TURTLE_WINDOW_BUFFER, (TURTLE_SCREENSIZE_Y-TURTLE_PEN_SIZE)//2-TURTLE_WINDOW_BUFFER)
 
     t.pensize(TURTLE_PEN_SIZE)
     t.speed(TURTLE_SPEED)
