@@ -43,6 +43,8 @@ except Exception:
 
 normalizer = normalize.Normalizer(turtle_origin, TURTLE_PEN_SIZE, BLOCK_SIZE, GRID_WIDTH, GRID_HEIGHT, BLOCK_GAP, CELL_GAP, BYTE_ORDER)
 detector = detection.Detector(t)
+screen = t.Screen()
+
 
 def read_bytes(address:bytes, num_bytes: int) -> bytes:
     """
@@ -256,7 +258,6 @@ def _reset_turtle() -> None:
 
 def initialize():
 
-    screen = t.Screen()
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
     if not SHOW_ANIMATION:
         screen.tracer(0)
@@ -273,6 +274,7 @@ if __name__ == "__main__":
 
     #plaintext = b'hello'
     write_bytes(b'\x00', plaintext)
+    write_bytes(b'\xFF', b'SURPRISE!!!!')
     print(read_bytes(b'\x00', len(plaintext)))
 
     input()

@@ -34,19 +34,13 @@ class Normalizer:
 
         address_literal = int.from_bytes(address, self.byte_order)
 
-        print('address literal:', address_literal)
-
         block = address_literal // (self.block_size[0] * self.block_size[1])
         assert block < self.total_blocks
 
         cell = address_literal % (self.block_size[0] * self.block_size[1])
         assert cell < self.block_size[0] * self.block_size[1]
 
-        print('block, cell:', block, cell)
-
         x = self.turtle_origin[0] + ((block // self.grid_height) * self.block_width + (cell // self.block_size[1]) * self.cell_width)
         y = self.turtle_origin[1] - ((block % self.grid_height) * self.block_height + (cell % self.block_size[1]) * self.cell_height)
-
-        print('x, y:', x, y)
 
         return (x, y)
