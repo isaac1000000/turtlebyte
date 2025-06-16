@@ -288,11 +288,10 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    plaintext = b'a' * 2000
+    msg = b'Hello and welcome to turtlebyte.py - A completely useless way to store memory.'
 
-    #plaintext = b'hello'
-    write_bytes(b'\x00', plaintext)
-    write_bytes(b'\xFF', b'SURPRISE!!!!')
-    print(read_bytes(b'\x00', len(plaintext)))
+    write_bytes(b'\x00', msg)
+
+    print(read_bytes(b'\x00', len(msg)))
 
     input()
