@@ -49,6 +49,7 @@ All configuration is passed to the initial `Turtlebyte` object. Optional setting
 - `turtle_window_buffer: 2`
     - This is the automatic border that comes with the `tkinter` canvas. On my device it's 2 pixels
 - `show_animation: False`
+    - If this is enabled, the turtle will move across your screen as it writes or reads. It's slow, so I prefer to leave this off and just set a low refresh interval
 - `refresh_interval: 10`
     - This is the number of bytes between screen updates in `write_bytes` and `read_bytes`
 - `grid_width: 2`
@@ -89,6 +90,6 @@ The blocks do not affect the way data is processed, it's entirely for effect.
 
 Each cell is one byte. If you don't feel like slowing down the animation to see what's going on, the byte is 4 bits wide and 2 bits tall. The 8 bits are written top left to top right, down, then bottom right to bottom left.
 
-Cells are written top left to bottom left in the block, then moved onto the next column until the block is full.
+Cells are written top left to bottom left in the block, then top to bottom on the next column until the block is full.
 
-Blocks are written top left to bottom left, then moved onto the next column until the grid is full.
+Blocks are written top left to bottom left, then top to bottom on the next column until the grid is full.
