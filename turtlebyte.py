@@ -27,9 +27,12 @@ try:
     TURTLE_SCREENSIZE_X = int(os.getenv('TURTLE_SCREENSIZE_X'))
     TURTLE_SCREENSIZE_Y = int(os.getenv('TURTLE_SCREENSIZE_Y'))
     TURTLE_WINDOW_BUFFER = int(os.getenv('TURTLE_WINDOW_BUFFER'))
-    SHOW_ANIMATION = 'true' == os.getenv('SHOW_ANIMATION').lower()
-
+    
     turtle_origin = ((-TURTLE_SCREENSIZE_X+TURTLE_PEN_SIZE)//2+TURTLE_WINDOW_BUFFER, (TURTLE_SCREENSIZE_Y-TURTLE_PEN_SIZE)//2-TURTLE_WINDOW_BUFFER)
+
+    SHOW_ANIMATION = 'true' == os.getenv('SHOW_ANIMATION').lower()
+    REFRESH_INTERVAL = int(os.getenv('REFRESH_INTERVAL'))
+
 
     GRID_WIDTH = int(os.getenv('GRID_WIDTH'))
     GRID_HEIGHT = int(os.getenv('GRID_HEIGHT'))
@@ -69,9 +72,15 @@ def read_bytes(address:bytes, num_bytes: int) -> bytes:
             t.setpos(normalized_address)
             t.seth(0)
         result += read_byte()
+
+        if cell % REFRESH_INTERVAL == 0:
+            screen.update()
+
         _l()
         _f(CELL_GAP + 1)
         t.seth(0)
+
+    screen.update()
 
     return result
 
@@ -139,12 +148,19 @@ def write_bytes(address: bytes, data: bytes) -> bool:
             normalized_address = normalizer.address_to_pos(new_address.to_bytes(address_length, BYTE_ORDER))
             t.setpos(normalized_address)
             t.seth(0)
+
         if write_byte(byte.to_bytes(1, BYTE_ORDER)) == False:
             return False
+        
+        if cell % REFRESH_INTERVAL == 0:
+            screen.update()
+
         _l()
         _f(CELL_GAP + 1)
         _l()
     
+    screen.update()
+
     return True
 
 def write_byte(data: bytes) -> bool:
@@ -272,11 +288,11 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    plaintext = b'a' * 400
+    plaintext = b'a' * 20
 
     #plaintext = b'hello'
     write_bytes(b'\x00', plaintext)
-    write_bytes(b'\x00', b'\x00' * 10)
+    write_bytes(b'\x00', b'SURPRISE!!!!')
     print(read_bytes(b'\x00', len(plaintext)))
 
     input()
