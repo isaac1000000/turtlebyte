@@ -8,9 +8,8 @@ little project. Enjoy!
 author: isaac1000000
 """
 
-import os
 import turtle as t
-from src.utils import normalize, detection
+from utils import normalize, detection
 
 class Turtlebyte():
 
