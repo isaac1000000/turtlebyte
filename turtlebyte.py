@@ -18,7 +18,7 @@ load_dotenv('.env', override=True)
 # HIGHLY experimental. Don't change unless you've got some big ideas...
 BLOCK_SIZE = (32, 16) # (width, height) in bytes
 BLOCK_GAP = 4 # number of pen size units to leave between blocks in the grid
-CELL_GAP = 1 # number of pen size units between cells in a block
+CELL_GAP = 0 # number of pen size units between cells in a block
 BYTE_ORDER = 'little'
 
 try:
@@ -68,7 +68,7 @@ def read_bytes(address:bytes, num_bytes: int) -> bytes:
             t.seth(0)
         result += read_byte()
         _l()
-        _f(2)
+        _f(CELL_GAP + 1)
         t.seth(0)
 
     return result
@@ -140,7 +140,7 @@ def write_bytes(address: bytes, data: bytes) -> bool:
         if write_byte(byte.to_bytes(1, BYTE_ORDER)) == False:
             return False
         _l()
-        _f(2)
+        _f(CELL_GAP + 1)
         _l()
     
     return True
@@ -269,7 +269,7 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    plaintext = b'hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now. hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now. hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now.'
+    plaintext = b'a' * 4000
 
     #plaintext = b'hello'
     write_bytes(b'\x00', plaintext)
