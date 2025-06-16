@@ -15,8 +15,6 @@ from utils import normalize, detection
 
 load_dotenv('.env', override=True)
 
-SHOW_TURTLE = False
-
 # HIGHLY experimental. Don't change unless you've got some big ideas...
 BLOCK_SIZE = (32, 16) # (width, height) in bytes
 BLOCK_GAP = 4 # number of pen size units to leave between blocks in the grid
@@ -29,11 +27,16 @@ try:
     TURTLE_SCREENSIZE_X = int(os.getenv('TURTLE_SCREENSIZE_X'))
     TURTLE_SCREENSIZE_Y = int(os.getenv('TURTLE_SCREENSIZE_Y'))
     TURTLE_WINDOW_BUFFER = int(os.getenv('TURTLE_WINDOW_BUFFER'))
+    SHOW_ANIMATION = 'true' == os.getenv('SHOW_ANIMATION').lower()
 
     turtle_origin = ((-TURTLE_SCREENSIZE_X+TURTLE_PEN_SIZE)//2+TURTLE_WINDOW_BUFFER, (TURTLE_SCREENSIZE_Y-TURTLE_PEN_SIZE)//2-TURTLE_WINDOW_BUFFER)
 
     GRID_WIDTH = int(os.getenv('GRID_WIDTH'))
     GRID_HEIGHT = int(os.getenv('GRID_HEIGHT'))
+
+    mem_size = GRID_WIDTH * GRID_HEIGHT * BLOCK_SIZE[0] * BLOCK_SIZE[1]
+    address_length = mem_size.bit_length() // 8 + 1
+
 except Exception:
     print("Error loading environment variables. Ensure your .env file is properly configured")
     exit()
@@ -58,8 +61,9 @@ def read_bytes(address:bytes, num_bytes: int) -> bytes:
 
     result = b''
     for cell in range(num_bytes):
-        if (int.from_bytes(address, BYTE_ORDER) + cell) % BLOCK_SIZE[0] == 0:
-            normalized_address = normalizer.address_to_pos(address)
+        new_address = int.from_bytes(address, BYTE_ORDER) + cell
+        if new_address % BLOCK_SIZE[0] == 0:
+            normalized_address = normalizer.address_to_pos(new_address.to_bytes(address_length, BYTE_ORDER))
             t.setpos(normalized_address)
             t.seth(0)
         result += read_byte()
@@ -128,14 +132,18 @@ def write_bytes(address: bytes, data: bytes) -> bool:
     t.seth(0)
     
     for cell, byte in enumerate(data):
-        if (int.from_bytes(address, BYTE_ORDER) + cell) % BLOCK_SIZE[0] == 0:
-            normalized_address = normalizer.address_to_pos(address)
+        new_address = int.from_bytes(address, BYTE_ORDER) + cell
+        if new_address % BLOCK_SIZE[0] == 0:
+            normalized_address = normalizer.address_to_pos(new_address.to_bytes(address_length, BYTE_ORDER))
             t.setpos(normalized_address)
             t.seth(0)
-        write_byte(byte.to_bytes(1, BYTE_ORDER))
+        if write_byte(byte.to_bytes(1, BYTE_ORDER)) == False:
+            return False
         _l()
         _f(2)
         _l()
+    
+    return True
 
 def write_byte(data: bytes) -> bool:
     """
@@ -250,7 +258,7 @@ def initialize():
 
     screen = t.Screen()
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
-    if not SHOW_TURTLE:
+    if not SHOW_ANIMATION:
         screen.tracer(0)
 
     t.pensize(TURTLE_PEN_SIZE)
@@ -261,7 +269,10 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    write_bytes(b'\x00', b'\x3f\xaa')
-    print(read_bytes(b'\x00', 2))
+    plaintext = b'hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now. hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now. hello i am isaac this is a test of the program turtlebyte. hopefully this goes over one block length so i can investigate whether or not it is working as expected. thank you for your time i am going to go run this program now.'
+
+    #plaintext = b'hello'
+    write_bytes(b'\x00', plaintext)
+    print(read_bytes(b'\x00', len(plaintext)))
 
     input()
