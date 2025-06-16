@@ -1,6 +1,6 @@
 import argparse
 
-import turtlebyte as tb
+import src.turtlebyte as turtlebyte
 
 parser = argparse.ArgumentParser(
     prog="turtlebyte.py",
@@ -18,7 +18,7 @@ def write_file(source: str):
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    tb.initialize()
+    tb = turtlebyte.Turtlebyte()
 
     if args.parse:
         write_file(args.parse)
