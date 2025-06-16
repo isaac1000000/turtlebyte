@@ -275,6 +275,9 @@ def _reset_turtle() -> None:
     t.seth(0)
 
 def initialize():
+    """
+    Initializes the turtle instance with already defined environment variables.
+    """
 
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
     if not SHOW_ANIMATION:
@@ -294,4 +297,4 @@ if __name__ == "__main__":
 
     print(read_bytes(b'\x00', len(msg)))
 
-    input()
+    input('Press enter to quit turtlebyte.py')
