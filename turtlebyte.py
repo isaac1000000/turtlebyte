@@ -15,7 +15,7 @@ from utils import normalize, detection
 
 load_dotenv('.env', override=True)
 
-SHOW_TURTLE = True
+SHOW_TURTLE = False
 
 # HIGHLY experimental. Don't change unless you've got some big ideas...
 BLOCK_SIZE = (32, 16) # (width, height) in bytes
@@ -262,7 +262,6 @@ if __name__ == "__main__":
     initialize()
 
     write_bytes(b'\x00', b'\x3f\xaa')
-    _reset_turtle()
     print(read_bytes(b'\x00', 2))
 
     input()

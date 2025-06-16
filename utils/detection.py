@@ -29,7 +29,7 @@ class Detector:
         # Returns true if an object was found at this pixel - turtle is counted as an object
         if self.turtle.Screen().tracer() and len(ids) > 1:
             index = ids[-2]
-        elif not self.turtle.Screen().tracer() and len(ids > 0): 
+        elif not self.turtle.Screen().tracer() and len(ids) > 0: 
             index = ids[-1]
         else:
             return False
