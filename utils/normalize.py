@@ -15,10 +15,10 @@ class Normalizer:
         self.byte_order = byte_order
 
         self.total_blocks = grid_width * grid_height
-        self.cell_width = turtle_pen_size * 2 + cell_gap * turtle_pen_size
-        self.cell_height = turtle_pen_size * (1 + cell_gap)
+        self.cell_width = turtle_pen_size * (4 + cell_gap)
+        self.cell_height = turtle_pen_size * (2 + cell_gap)
         self.block_width = block_size[0] * self.cell_width + block_gap * turtle_pen_size
-        self.block_height = block_size[1] * self.cell_height * 4 + block_gap * turtle_pen_size
+        self.block_height = block_size[1] * self.cell_height + block_gap * turtle_pen_size
 
     def address_to_pos(self, address: bytes) -> tuple[int]:
         """

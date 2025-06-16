@@ -25,7 +25,6 @@ class Detector:
 
         canvas = self.turtle.getcanvas()
         ids = canvas.find_overlapping(x, y, x, y)
-        print(ids)
 
         # Returns true if an object was found at this pixel - turtle is counted as an object
         if len(ids) > 0:

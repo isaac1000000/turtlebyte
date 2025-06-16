@@ -16,7 +16,7 @@ from utils import normalize, detection
 load_dotenv('.env', override=True)
 
 # HIGHLY experimental. Don't change unless you've got some big ideas...
-BLOCK_SIZE = (32, 16) # (width, height) in bytes
+BLOCK_SIZE = (16, 32) # (width, height) in bytes
 BLOCK_GAP = 4 # number of pen size units to leave between blocks in the grid
 CELL_GAP = 0 # number of pen size units between cells in a block
 BYTE_ORDER = 'little'
@@ -67,7 +67,7 @@ def read_bytes(address:bytes, num_bytes: int) -> bytes:
     result = b''
     for cell in range(num_bytes):
         new_address = int.from_bytes(address, BYTE_ORDER) + cell
-        if new_address % BLOCK_SIZE[0] == 0:
+        if new_address % BLOCK_SIZE[1] == 0:
             normalized_address = normalizer.address_to_pos(new_address.to_bytes(address_length, BYTE_ORDER))
             t.setpos(normalized_address)
             t.seth(0)
@@ -144,7 +144,7 @@ def write_bytes(address: bytes, data: bytes) -> bool:
     
     for cell, byte in enumerate(data):
         new_address = int.from_bytes(address, BYTE_ORDER) + cell
-        if new_address % BLOCK_SIZE[0] == 0:
+        if new_address % BLOCK_SIZE[1] == 0:
             normalized_address = normalizer.address_to_pos(new_address.to_bytes(address_length, BYTE_ORDER))
             t.setpos(normalized_address)
             t.seth(0)
@@ -288,11 +288,11 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    plaintext = b'a' * 20
+    plaintext = b'a' * 2000
 
     #plaintext = b'hello'
     write_bytes(b'\x00', plaintext)
-    write_bytes(b'\x00', b'SURPRISE!!!!')
+    write_bytes(b'\xFF', b'SURPRISE!!!!')
     print(read_bytes(b'\x00', len(plaintext)))
 
     input()
