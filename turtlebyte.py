@@ -200,6 +200,8 @@ def _write_nibble_at_current(nib: list[bool]) -> None:
         _f()
     if nib[3]:
         _m()
+    else:
+        _u()
 
 def _r(degrees: float=90) -> None:
     """
@@ -270,11 +272,11 @@ def initialize():
 if __name__ == "__main__":
     initialize()
 
-    plaintext = b'a' * 4000
+    plaintext = b'a' * 400
 
     #plaintext = b'hello'
     write_bytes(b'\x00', plaintext)
-    write_bytes(b'\xFF', b'SURPRISE!!!!')
+    write_bytes(b'\x00', b'\x00' * 10)
     print(read_bytes(b'\x00', len(plaintext)))
 
     input()
