@@ -18,17 +18,26 @@ class Detector:
         Returns:
             bool: True if the pixel is marked
         """
-        # tkinter canvas idiosyncracy
         x, y = self.turtle.pos()
 
+        # tkinter canvas idiosyncracy
         y = -y
 
         canvas = self.turtle.getcanvas()
         ids = canvas.find_overlapping(x, y, x, y)
 
         # Returns true if an object was found at this pixel - turtle is counted as an object
-        if len(ids) > 1:
-            return True
-        return False
+        if self.turtle.Screen().tracer() and len(ids) > 1:
+            index = ids[-2]
+        elif not self.turtle.Screen().tracer() and len(ids > 0): 
+            index = ids[-1]
+        else:
+            return False
+        
+        color = canvas.itemcget(index, "fill")
 
+        if color == 'black':
+            return True
+        
+        return False
 

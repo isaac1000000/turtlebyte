@@ -15,6 +15,8 @@ from utils import normalize, detection
 
 load_dotenv('.env', override=True)
 
+SHOW_TURTLE = True
+
 # HIGHLY experimental. Don't change unless you've got some big ideas...
 BLOCK_SIZE = (32, 16) # (width, height) in bytes
 BLOCK_GAP = 4 # number of pen size units to leave between blocks in the grid
@@ -39,19 +41,43 @@ except Exception:
 normalizer = normalize.Normalizer(turtle_origin, TURTLE_PEN_SIZE, BLOCK_SIZE, GRID_WIDTH, GRID_HEIGHT, BLOCK_GAP, CELL_GAP, BYTE_ORDER)
 detector = detection.Detector(t)
 
-def read_byte(address:bytes) -> bytes:
+def read_bytes(address:bytes, num_bytes: int) -> bytes:
     """
-    Reads a byte at a specific address in memory.
+    Reads a specific number of bytes at a given address
 
     Args:
-        address (int): the address to read.
+        address (bytes): the address to begin reading
+        num_bytes (int): the number of bytes to read
     Returns:
-        bytes: the byte found at address.
+        bytes: the bytes found at the given address
     """
 
     normalized_address = normalizer.address_to_pos(address)
     t.setpos(normalized_address)
     t.seth(0)
+
+    result = b''
+    for cell in range(num_bytes):
+        if (int.from_bytes(address, BYTE_ORDER) + cell) % BLOCK_SIZE[0] == 0:
+            normalized_address = normalizer.address_to_pos(address)
+            t.setpos(normalized_address)
+            t.seth(0)
+        result += read_byte()
+        _l()
+        _f(2)
+        t.seth(0)
+
+    return result
+
+
+
+def read_byte() -> bytes:
+    """
+    Reads a byte at the current address in memory
+
+    Returns:
+        bytes: the byte found at the current address.
+    """
 
     byte = _read_nibble()
     byte = byte << 4
@@ -82,12 +108,40 @@ def _read_nibble() -> int:
         result += 1
     return result
 
-def write_byte(address: bytes, data: bytes) -> bool:
+def write_bytes(address: bytes, data: bytes) -> bool:
     """
-    Writes a byte to a specific address in memory.
+    Writes bytes at a specific address in the memory.
+
+    WARNING: This is not secure! It can very easily overwrite
+    old memory.
+    
+    Args:
+        address (bytes): the address to write the bytes at
+        data (bytes): the byte-format data to be written
+
+    Returns:
+        bool: True if write is successful
+    """
+
+    normalized_address = normalizer.address_to_pos(address)
+    t.setpos(normalized_address)
+    t.seth(0)
+    
+    for cell, byte in enumerate(data):
+        if (int.from_bytes(address, BYTE_ORDER) + cell) % BLOCK_SIZE[0] == 0:
+            normalized_address = normalizer.address_to_pos(address)
+            t.setpos(normalized_address)
+            t.seth(0)
+        write_byte(byte.to_bytes(1, BYTE_ORDER))
+        _l()
+        _f(2)
+        _l()
+
+def write_byte(data: bytes) -> bool:
+    """
+    Writes a byte at the current address in memory
 
     Args:
-        address (int): the address to write the byte to.
         data (bytes): the byte to write at address.
 
     Returns:
@@ -95,10 +149,6 @@ def write_byte(address: bytes, data: bytes) -> bool:
     """
     assert isinstance(data, bytes), "Invalid operation: attempt to write non-bytes object"
     assert len(data) == 1, "Invalid operation: attempt to write more or less than one byte"
-
-    normalized_address = normalizer.address_to_pos(address)
-    t.setpos(normalized_address)
-    t.seth(0)
 
     bit_array = [int.from_bytes(data, BYTE_ORDER) & 2**i != 0 for i in range(7, -1, -1)] # endian-ness does not matter here b/c one byte
 
@@ -135,6 +185,8 @@ def _write_nibble_at_current(nib: list[bool]) -> None:
         assert isinstance(bit_value, bool), "Invalid operation: attempt to write non-bool elememt to nibble"
         if bit_value:
             _m()
+        else:
+            _u()
         _f()
     if nib[3]:
         _m()
@@ -157,23 +209,23 @@ def _l(degrees: float=90) -> None:
     """
     t.lt(degrees)
 
-def _f(distance: float=TURTLE_PEN_SIZE) -> None:
+def _f(distance: float=1) -> None:
     """
     An internal shorthand function that moves turtle forward, defaults to 1 square
 
     Args:
         distance(float): The distance to move turtle, defaults to TURTLE_PEN_SIZE
     """
-    t.fd(distance)
+    t.fd(distance * TURTLE_PEN_SIZE)
 
-def _b(distance: float=TURTLE_PEN_SIZE) -> None:
+def _b(distance: float=1) -> None:
     """
     An internal shorthand function that moves turtle backwards, defaults to 1 square
 
     Args:
         distance(float): The distance to move turtle, defaults to TURTLE_PEN_SIZE
     """
-    t.bk(distance)
+    t.bk(distance * TURTLE_PEN_SIZE)
 
 def _m() -> None:
     """
@@ -181,26 +233,36 @@ def _m() -> None:
     """
     t.dot(TURTLE_PEN_SIZE)
 
+def _u() -> None:
+    """
+    An internal shorthand function to unmark the current space with turtle
+    """
+    t.dot(TURTLE_PEN_SIZE, 'white')
+
+def _reset_turtle() -> None:
+    """
+    An internal function that resets turtle to the origin
+    """
+    t.setpos(turtle_origin)
+    t.seth(0)
+
 def initialize():
 
     screen = t.Screen()
     screen.setup(width=TURTLE_SCREENSIZE_X, height=TURTLE_SCREENSIZE_Y)
-    screen.tracer(0)
+    if not SHOW_TURTLE:
+        screen.tracer(0)
 
     t.pensize(TURTLE_PEN_SIZE)
     t.speed(TURTLE_SPEED)
     t.pu()
-    t.setposition(*turtle_origin)
+    t.setposition(turtle_origin)
 
 if __name__ == "__main__":
     initialize()
-    t.setposition(turtle_origin)
 
-    for i in range(256):
-        data = i.to_bytes(1, BYTE_ORDER)
-        for j in range(256):
-            address = (i*j).to_bytes(2, BYTE_ORDER)
-            write_byte(address, data)
+    write_bytes(b'\x00', b'\x3f\xaa')
+    _reset_turtle()
+    print(read_bytes(b'\x00', 2))
 
-    t.Screen().update()
     input()

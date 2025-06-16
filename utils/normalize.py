@@ -40,11 +40,7 @@ class Normalizer:
         cell = address_literal % (self.block_size[0] * self.block_size[1])
         assert cell < self.block_size[0] * self.block_size[1]
 
-        print(block, cell)
-
         x = self.turtle_origin[0] + ((block % self.grid_width) * self.block_width + (cell % self.block_size[0]) * self.cell_width)
         y = self.turtle_origin[1] - ((block // self.grid_width) * self.block_height + (cell // self.block_size[0]) * self.cell_height)
-
-        print(x, y)
 
         return (x, y)
