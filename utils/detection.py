@@ -25,18 +25,24 @@ class Detector:
 
         canvas = self.turtle.getcanvas()
         ids = canvas.find_overlapping(x, y, x, y)
+        print(ids)
 
         # Returns true if an object was found at this pixel - turtle is counted as an object
-        if self.turtle.Screen().tracer() and len(ids) > 1:
-            index = ids[-2]
-        elif not self.turtle.Screen().tracer() and len(ids) > 0: 
-            index = ids[-1]
+        if len(ids) > 0:
+            index = None
+            # Gets the topmost object that isn't the turtle (which always has id 3 as far as I know)
+            for id in ids[::-1]:
+                if id > 3:
+                    index = id
+                    break
+            if index is None:
+                return False
         else:
             return False
         
         color = canvas.itemcget(index, "fill")
 
-        if color == 'black':
+        if color == self.turtle.color()[1]:
             return True
         
         return False
