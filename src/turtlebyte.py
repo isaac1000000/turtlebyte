@@ -289,14 +289,3 @@ class Turtlebyte():
         t.speed(self.turtle_speed)
         t.pu()
         t.setposition(self.turtle_origin)
-
-if __name__ == "__main__":
-    tb = Turtlebyte()
-
-    msg = b'Hello and welcome to turtlebyte.py - A completely useless way to store memory.'
-
-    tb.write_bytes(b'\x00', msg)
-
-    print(tb.read_bytes(b'\x00', len(msg)))
-
-    input('Press enter to quit turtlebyte.py')

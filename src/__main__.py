@@ -15,13 +15,18 @@ def write_file(source: str):
     
     tb.write_bytes(b'\x00', data)
 
-if __name__ == "__main__":
-    args = parser.parse_args()
 
-    tb = turtlebyte.Turtlebyte()
+args = parser.parse_args()
 
-    if args.parse:
-        write_file(args.parse)
+tb = turtlebyte.Turtlebyte()
 
-    input('Press "Enter" to quit turtlebyte.py >>')
-        
+if args.parse:
+    write_file(args.parse)
+else:
+    msg = b'Hello and welcome to turtlebyte.py - A completely useless way to store memory.'
+    tb.write_bytes(b'\x00', msg)
+    print(tb.read_bytes(b'\x00', len(msg)))
+
+
+input('Press "Enter" to quit turtlebyte.py >>')
+    
