@@ -54,7 +54,7 @@ All configuration is passed to the initial `Turtlebyte` object. Optional setting
     - This is the number of bytes between screen updates in `write_bytes` and `read_bytes`
 - `grid_width: 2`
     - The number of columns in the grid of data blocks
-- `grid_height`
+- `grid_height: 2`
     - The number of rows in the grid of data blocks
 
 
