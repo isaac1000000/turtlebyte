@@ -1,7 +1,7 @@
 [![Upload Python Package](https://github.com/isaac1000000/turtlebyte/actions/workflows/python-publish.yml/badge.svg)](https://github.com/isaac1000000/turtlebyte/actions/workflows/python-publish.yml)
 # turtlebyte.py
 
-Turtlebyte is a thing I did for fun. It uses Python's turtle module to store memory by drawing it on your screen. I plan to use it for some silly things in the future.
+Turtlebyte is a thing I did for fun. It uses Python's turtle module to store memory by drawing it on your screen. I plan to use it for some silly things in the future. Check out my blog post about it [here](https://www.isaac-fisher.com/Blog.html#turtlebyte-a-harder-drive):
 
 ## Installation
 
