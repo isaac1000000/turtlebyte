@@ -46,8 +46,8 @@ All configuration is passed to the initial `Turtlebyte` object. Optional setting
 - `turtle_speed: 1000` (turtle has a maximum speed)
 - `turtle_screensize_x: 600`
 - `turtle_screensize_y: 600`
-- `turtle_window_buffer: 2`
-    - This is the automatic border that comes with the `tkinter` canvas. On my device it's 2 pixels
+- `turtle_window_buffer: 6`
+    - This is the automatic border that comes with the `tkinter` canvas. On my device it's 6 pixels
 - `show_animation: False`
     - If this is enabled, the turtle will move across your screen as it writes or reads. It's slow, so I prefer to leave this off and just set a low refresh interval
 - `refresh_interval: 10`

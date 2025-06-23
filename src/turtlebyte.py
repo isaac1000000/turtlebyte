@@ -8,7 +8,8 @@ little project. Enjoy!
 author: isaac1000000
 """
 
-import turtle as t
+from tkinter import  Tk, Canvas, LEFT, BOTH
+from turtle import RawTurtle, TurtleScreen
 from utils import normalize, detection
 
 class Turtlebyte():
@@ -31,24 +32,25 @@ class Turtlebyte():
         """
 
         normalized_address = self.normalizer.address_to_pos(address)
-        t.setpos(normalized_address)
-        t.seth(0)
+        self.t.setpos(normalized_address)
+        self.t.seth(0)
 
         result = b''
         for cell in range(num_bytes):
             new_address = int.from_bytes(address, self.BYTE_ORDER) + cell
             if new_address % self.BLOCK_SIZE[1] == 0:
-                normalized_address = self.normalizer.address_to_pos(new_address.to_bytes(self.address_length, self.BYTE_ORDER))
-                t.setpos(normalized_address)
-                t.seth(0)
-            result += self.read_byte()
+                normalized_address = self.normalizer.address_to_pos(
+                    new_address.to_bytes(self.address_length, self.BYTE_ORDER))
+                self.t.setpos(normalized_address)
+                self.t.seth(0)
+            result += self._read_byte()
 
             if cell % self.refresh_interval == 0:
                 self.screen.update()
 
             self._l()
             self._f(self.CELL_GAP + 1)
-            t.seth(0)
+            self.t.seth(0)
 
         self.screen.update()
 
@@ -56,7 +58,7 @@ class Turtlebyte():
 
 
 
-    def read_byte(self) -> bytes:
+    def _read_byte(self) -> bytes:
         """
         Reads a byte at the current address in memory
 
@@ -109,31 +111,32 @@ class Turtlebyte():
         """
 
         normalized_address = self.normalizer.address_to_pos(address)
-        t.setpos(normalized_address)
-        t.seth(0)
-        
+        self.t.setpos(normalized_address)
+        self.t.seth(0)
+
         for cell, byte in enumerate(data):
             new_address = int.from_bytes(address, self.BYTE_ORDER) + cell
             if new_address % self.BLOCK_SIZE[1] == 0:
-                normalized_address = self.normalizer.address_to_pos(new_address.to_bytes(self.address_length, self.BYTE_ORDER))
-                t.setpos(normalized_address)
-                t.seth(0)
+                normalized_address = self.normalizer.address_to_pos(
+                    new_address.to_bytes(self.address_length, self.BYTE_ORDER))
+                self.t.setpos(normalized_address)
+                self.t.seth(0)
 
-            if self.write_byte(byte.to_bytes(1, self.BYTE_ORDER)) == False:
+            if self._write_byte(byte.to_bytes(1, self.BYTE_ORDER)) is False:
                 return False
-            
+
             if cell % self.refresh_interval == 0:
                 self.screen.update()
 
             self._l()
             self._f(self.CELL_GAP + 1)
             self._l()
-        
+
         self.screen.update()
 
         return True
 
-    def write_byte(self, data: bytes) -> bool:
+    def _write_byte(self, data: bytes) -> bool:
         """
         Writes a byte at the current address in memory
 
@@ -178,7 +181,8 @@ class Turtlebyte():
 
         # Only first 3 need moves after them, so split the nibble to save a step
         for bit_value in nib[:3]:
-            assert isinstance(bit_value, bool), "Invalid operation: attempt to write non-bool elememt to nibble"
+            assert isinstance(bit_value, bool), ("Invalid operation: attempt to " +
+            "write non-bool elememt to nibble")
             if bit_value:
                 self._m()
             else:
@@ -196,7 +200,7 @@ class Turtlebyte():
         Args:
             degrees(float)=90: The degrees to turn turtle
         """
-        t.rt(degrees)
+        self.t.rt(degrees)
 
     def _l(self, degrees: float=90) -> None:
         """
@@ -205,7 +209,7 @@ class Turtlebyte():
         Args:
             degrees(float)=90: The degrees to turn turtle
         """
-        t.lt(degrees)
+        self.t.lt(degrees)
 
     def _f(self, distance: float=1) -> None:
         """
@@ -214,7 +218,7 @@ class Turtlebyte():
         Args:
             distance(float): The distance to move turtle, defaults to turtle_pen_size
         """
-        t.fd(distance * self.turtle_pen_size)
+        self.t.fd(distance * self.turtle_pen_size)
 
     def _b(self, distance: float=1) -> None:
         """
@@ -223,36 +227,44 @@ class Turtlebyte():
         Args:
             distance(float): The distance to move turtle, defaults to turtle_pen_size
         """
-        t.bk(distance * self.turtle_pen_size)
+        self.t.bk(distance * self.turtle_pen_size)
 
     def _m(self) -> None:
         """
         An internal shorthand function to mark the current space with turtle
         """
-        t.dot(self.turtle_pen_size)
+        self.t.dot(self.turtle_pen_size)
 
     def _u(self) -> None:
         """
         An internal shorthand function to unmark the current space with turtle
         """
-        t.dot(self.turtle_pen_size, 'white')
+        self.t.dot(self.turtle_pen_size, 'white')
 
     def _reset_turtle(self) -> None:
         """
         An internal function that resets turtle to the origin
         """
-        t.setpos(self.turtle_origin)
-        t.seth(0)
+        self.t.setpos(self.turtle_origin)
+        self.t.seth(0)
+
+    def _update_window(self) -> None:
+        self.window.update_window()
 
     def __init__(self, turtle_pen_size: int=10,
                  turtle_speed: int=1000,
                  turtle_screensize_x: int=600,
                  turtle_screensize_y: int=600,
-                 turtle_window_buffer: int=2,
+                 turtle_window_buffer: int=6,
                  show_animation: bool=False,
                  refresh_interval: int=10,
+                 show_turtle: bool=True,
                  grid_width: int=2,
                  grid_height: int=2):
+
+        self.window = Window('turtlebyte', turtle_screensize_x, 
+                             turtle_screensize_y)
+        self.t = self.window.turtle
 
         self.turtle_pen_size = turtle_pen_size
         self.turtle_speed = turtle_speed
@@ -267,25 +279,59 @@ class Turtlebyte():
 
         self.show_animation = show_animation
         self.refresh_interval = refresh_interval
+        self.show_turtle = show_turtle
 
         self.grid_width = grid_width
         self.grid_height = grid_height
 
 
-        self.turtle_origin = ((-self.turtle_screensize_x+self.turtle_pen_size)//2+self.turtle_window_buffer,
-                              (self.turtle_screensize_y-self.turtle_pen_size)//2-self.turtle_window_buffer)
+        self.turtle_origin = ((-self.turtle_screensize_x+self.turtle_pen_size)//
+                              2+self.turtle_window_buffer,
+                              (self.turtle_screensize_y-self.turtle_pen_size)//
+                              2-self.turtle_window_buffer)
         self.mem_size = self.grid_width * self.grid_height * self.BLOCK_SIZE[0] * self.BLOCK_SIZE[1]
         self.address_length = self.mem_size.bit_length() // 8 + 1
 
-        self.normalizer = normalize.Normalizer(self.turtle_origin, self.turtle_pen_size, self.BLOCK_SIZE, self.grid_width, self.grid_height, self.BLOCK_GAP, self.CELL_GAP, self.BYTE_ORDER)
-        self.detector = detection.Detector(t)
-        self.screen = t.Screen()
+        self.normalizer = normalize.Normalizer(self.turtle_origin, 
+                                               self.turtle_pen_size, 
+                                               self.BLOCK_SIZE, 
+                                               self.grid_width,
+                                                 self.grid_height, 
+                                                 self.BLOCK_GAP, 
+                                                 self.CELL_GAP, 
+                                                 self.BYTE_ORDER)
+        self.detector = detection.Detector(self.t)
 
-        self.screen.setup(width=self.turtle_screensize_x, height=self.turtle_screensize_y)
+        self.screen = self.t.screen
+
         if not self.show_animation:
             self.screen.tracer(0)
 
-        t.pensize(self.turtle_pen_size)
-        t.speed(self.turtle_speed)
-        t.pu()
-        t.setposition(self.turtle_origin)
+        if not self.show_turtle:
+            self.t.hideturtle()
+
+        self.t.pensize(self.turtle_pen_size)
+        self.t.speed(self.turtle_speed)
+        self.t.pu()
+        self.t.setposition(self.turtle_origin)
+
+class Window(Tk):
+    def __init__(self, title, width, height):
+        super().__init__()
+        self.running = True
+        self.geometry(str(width)+'x'+str(height))
+        self.title(title)
+        self.protocol("WM_DELETE_WINDOW", self.destroy_window)
+        self.canvas = Canvas(self, width=width, height=height)
+        self.canvas.pack(side=LEFT, expand=False, fill=BOTH)
+        self.turtle = RawTurtle(TurtleScreen(self.canvas))
+
+    def update_window(self):
+        if self.running:
+            self.update_idletasks()
+            self.update()
+        # TODO: raise error if not running and attempt to update
+
+    def destroy_window(self):
+        self.running = False
+        self.destroy()

@@ -23,7 +23,7 @@ class Detector:
         # tkinter canvas idiosyncracy
         y = -y
 
-        canvas = self.turtle.getcanvas()
+        canvas = self.turtle.screen.getcanvas()
         ids = canvas.find_overlapping(x, y, x, y)
 
         # Returns true if an object was found at this pixel - turtle is counted as an object
